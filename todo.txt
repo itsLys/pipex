@@ -1,1 +1,14 @@
-Hello
+man:
+	perror
+	strerror
+	access
+	--dup
+	dup2
+	execve
+	fork
+	pipe
+	unlink
+	wait
+	waitpid
+
+also check for execve errors
