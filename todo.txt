@@ -2,13 +2,18 @@ man:
 	perror
 	strerror
 	access
-	--dup
+	dup
 	dup2
 	execve
 	fork
 	pipe
-	unlink
+	--unlink
 	wait
 	waitpid
 
 also check for execve errors
+-- pipe buffering
+use pipex for redirecting on tty
+test examples:
+	< file1 tr '[:lower:]' '[:upper:]' | sort | uniq > file2
+
