@@ -1,5 +1,6 @@
 #include "libft.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -8,11 +9,11 @@
 
 typedef	struct s_pipex
 {
-	int		fd_in;
-	int		fd_out;
-	char	cmd_paths[2];
+	int		*fd[2];
+	char	*cmd_paths[2];
 
 }		t_pipe ;
+
 
 char *ft_getenv(char **envp, char *var)
 {
@@ -30,6 +31,14 @@ char *ft_getenv(char **envp, char *var)
 	}
 	return (NULL);
 }
+
+void *free_split(char **split)
+{
+	while (*split)
+		free(split++);
+	return (NULL);
+}
+
 char **ft_getpath(char *path)
 {
 	char **path_list;
@@ -37,35 +46,48 @@ char **ft_getpath(char *path)
 	int i;
 
 	path_list = ft_split(path, ':');
+	if (path_list == NULL)
+		return (NULL);
 	i = 0;
 	while (path_list[i])
 	{
-		path_list[i] = ft_strjoin(path_list[i], "/");
-		i++;
+		tmp = ft_strjoin(path_list[i], "/");
+		if (tmp == NULL)
+			return (free_split(path_list));
+		free(path_list[i]);
+		path_list[i++] = tmp;
 	}
 	return path_list;
 }
 
-int main(int ac, char **av, char **ep)
+int ft_execvpe(char *file, char **av, char **envp)
 {
-	char *path;
-	char **path_list;
-
-	if (ac != 5)
-		return (ERROR);
+	char	**path_list;
+	char	*path;
 	path = ft_getenv(__environ, "PATH=");
-	printf("path:	%s\n", path);
 	if (path == NULL)
 		return (ERROR);
 	path_list = ft_getpath(path);
-	int i = 0;
-	while (path_list[i])
-	{
-		printf("	%s\n", path_list[i++]);
-	}
+	if (path_list == NULL)
+		return (ERROR);
+	// while ()
 }
-// Hello1
-// Hello
+
+int main(int ac, char **av, char **envp)
+{
+	t_pipe	pipe;
+
+	if (ac != 5)
+		return (ERROR);
+}
+// allocate memory and push to the pointer to a list,
+// and ft_free
+//
+//
+//
+//
+// now that i have path list, I need to figure out where is the command located?
+// 	maybe I need to execve it until the return value is not -1;
 // NOTE:	check with access the existence of cmd1, and cmd2
 // 			check the existence of the file1 and file2
 //
