@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <fcntl.h>
 #define SUCCESS 0
@@ -9,8 +10,8 @@
 
 typedef	struct s_pipex
 {
-	int		*fd[2];
-	char	*cmd_paths[2];
+	int		fd[2];
+	char	*cmd[2];
 
 }		t_pipe ;
 
@@ -64,21 +65,44 @@ int ft_execvpe(char *file, char **av, char **envp)
 {
 	char	**path_list;
 	char	*path;
+	int		i;
 	path = ft_getenv(__environ, "PATH=");
 	if (path == NULL)
 		return (ERROR);
 	path_list = ft_getpath(path);
 	if (path_list == NULL)
 		return (ERROR);
-	// while ()
+	i = 0;
+	while (execve(ft_strjoin(path_list[i], file), av, envp) == -1)
+		i++;
+	perror("execve");
+	exit(ERROR);
 }
 
 int main(int ac, char **av, char **envp)
 {
-	t_pipe	pipe;
+	t_pipe	pipex;
 
 	if (ac != 5)
 		return (ERROR);
+	pipex.fd[0] = open(av[1], O_RDONLY);
+	pipex.fd[1] = open(av[4], O_WRONLY);
+	pipex.cmd[0] = av[2];
+	pipex.cmd[1] = av[3];
+	int fd[2];
+	pipe(fd);
+	int id = fork();
+	if (id == 0)
+	{
+		dup2(fd[1], 1);
+		ft_execvpe(pipex.cmd[0], (char *[]){pipex.cmd[0], NULL}, envp);
+	}
+	wait(NULL);
+	char *buff;
+	buff = calloc(200, 1);
+	int n = read(fd[0], buff, 100);
+	printf("cmd1 output:	\n%s\n", buff);
+
 }
 // allocate memory and push to the pointer to a list,
 // and ft_free

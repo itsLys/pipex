@@ -12,13 +12,10 @@ t_list *get_alloc_list(void)
 void *ft_malloc(size_t size)
 {
 	t_list	*head;
-	t_list	node;
 	void	*p;
 
 	head = get_alloc_list();
 	p = malloc(size);
-	node.content = p;
-	node.next = NULL;
-	ft_lstadd_back(&head, &node);
+	ft_lstadd_back(&head, ft_lstnew(p));
 	return (p);
 }
