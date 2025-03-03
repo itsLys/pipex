@@ -1,0 +1,20 @@
+man:
+	perror
+	strerror
+	access
+	dup
+	dup2
+	execve
+	fork
+	pipe
+	--unlink
+	wait
+	waitpid
+
+also check for execve errors
+-- pipe buffering
+use pipex for redirecting on tty
+test examples:
+	< file1 tr '[:lower:]' '[:upper:]' | sort | uniq > file2
+
+test executing a non-executable
