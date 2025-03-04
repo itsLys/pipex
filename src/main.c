@@ -5,6 +5,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 #define SUCCESS 0
 #define ERROR -1
 
@@ -13,8 +14,7 @@ typedef	struct s_pipex
 	int		fd[2];
 	int		pipe_fd[2];
 	char	**av[2];
-	int		end1;
-	int		end2;
+	char	**envp;
 }		t_pipe ;
 
 char *ft_getenv(char **envp, char *var)
@@ -85,37 +85,68 @@ int ft_execvpe(char *file, char **av, char **envp)
 	exit(ERROR);
 }
 
+#define STDIN 0
+#define STDOUT 1
+#define PIPE_RD 0
+#define PIPE_WR 1
+#define FILE_RD 0
+#define FILE_WR 1
 
-int spawn_child(char **av, char **envp, t_pipe data)
+int spawn_first_child(t_pipe data)
 {
-	pid_t	pid;
-	
+	pid_t pid;
+
 	pid = fork();
 	if (pid == 0)
 	{
-		close(data.end2);
-		close(data.pipe_fd[data.end1]);
-		close(data.fd[data.end2]);
-		dup2(data.fd[data.end1], data.end1);
-		dup2(data.pipe_fd[data.end2], data.end2);
-		close(data.pipe_fd[data.end2]);
-		ft_execvpe(data.av[data.end1][0], data.av[data.end1], envp);
-		// hendle errors
+		close(data.pipe_fd[PIPE_RD]);
+		close(data.fd[FILE_WR]);
+		// printf("%d	\n", dup2(data.fd[FILE_RD], STDIN));
+		if (dup2(data.fd[FILE_RD], STDIN) == ERROR)
+			return ERROR;
+		dup2(data.pipe_fd[PIPE_WR], STDOUT);
+		close(data.pipe_fd[PIPE_WR]);
+		ft_execvpe(data.av[0][0], data.av[0], data.envp);
 	}
-	else if (pid == -1)
-		return (ERROR);
-	return (SUCCESS);
+	else if (pid == ERROR)
+		return ERROR;
+	return 0;
 }
+
+int spawn_second_child(t_pipe data)
+{
+	pid_t pid;
+
+	pid = fork();
+	if (pid == 0)
+	{
+		close(data.pipe_fd[PIPE_WR]);
+		close(data.fd[FILE_RD]);
+		dup2(data.fd[FILE_WR], STDOUT);
+		dup2(data.pipe_fd[PIPE_RD], STDIN);
+		close(data.pipe_fd[PIPE_RD]);
+		ft_execvpe(data.av[1][0], data.av[1], data.envp);
+	}
+	else if (pid == ERROR)
+		return ERROR;
+	return 0;
+}
+
 char **parse_av(char *str)
 {
-	return NULL;
+	char **av;
+
+	av = ft_tokenize(str);
+	if (av == NULL)
+		return (NULL);
+	return av;
 }
+
 void close_pipe(int fd[2])
 {
 	close(fd[0]);
 	close(fd[1]);
 }
-
 int main(int ac, char **av, char **envp)
 {
 	t_pipe	data;
@@ -123,12 +154,14 @@ int main(int ac, char **av, char **envp)
 	if (ac != 5)
 		return (ERROR);
 	data.fd[0] = open(av[1], O_RDONLY);
-	data.fd[1] = open(av[4], O_WRONLY | O_TRUNC);
+	data.fd[1] = open(av[4], O_WRONLY | O_TRUNC | O_CREAT,
+				   S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 	data.av[0] = parse_av(av[2]);
 	data.av[1] = parse_av(av[3]);
+	data.envp = envp;
 	pipe(data.pipe_fd);
-	spawn_child(data.av[0], envp, data);
-	spawn_child(data.av[1], envp, data);
+	spawn_first_child(data);
+	spawn_second_child(data);
 	close_pipe(data.pipe_fd);
 	while (wait(NULL) != -1)
 		;
