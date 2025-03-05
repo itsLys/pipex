@@ -21,10 +21,11 @@ void *ft_malloc(size_t size)
 	return (p);
 }
 
-void *ft_clear_list(void)
+void ft_exit(int status)
 {
 	t_list *head;
 	head = get_alloc_list();
 
 	ft_lstclear(&head, free);
+	exit(status);
 }

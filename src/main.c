@@ -21,7 +21,7 @@ char *ft_getenv(char **envp, char *var)
 {
 	int var_len;
 
-	if (envp)
+	if (envp && var)
 	{
 		var_len = ft_strlen(var);
 		while (*envp)
@@ -33,6 +33,7 @@ char *ft_getenv(char **envp, char *var)
 	}
 	return (NULL);
 }
+// test edge cases
 
 void *free_split(char **split)
 {
@@ -156,6 +157,7 @@ void close_pipe(int fd[2])
 	close(fd[0]);
 	close(fd[1]);
 }
+
 int main(int ac, char **av, char **envp)
 {
 	t_pipe	data;
