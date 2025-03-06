@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #define SUCCESS 0
 #define ERROR -1
+#define FAILIURE 1
 
 typedef	struct s_pipex
 {
@@ -71,11 +72,11 @@ void	execute_file(char **path_list, char *file, char **av, char **envp)
 {
 	char	*file_path;
 	int		i;
-	
+
 	i = 0;
 	while (path_list[i])
 	{
-		file_path = ft_strjoin(path_list[i++], file); 
+		file_path = ft_strjoin(path_list[i++], file);
 		if (file_path == NULL)
 			return ;
 		execve(file_path, av, envp);
@@ -128,7 +129,7 @@ void exit_program(t_pipe *data, int status)
 void handle_error(char *str, t_pipe *data)
 {
 	perror(str);
-	exit_program(data, ERROR);
+	exit_program(data, FAILIURE);
 }
 
 int	spawn_first_child(t_pipe *data)
@@ -148,10 +149,10 @@ int	spawn_first_child(t_pipe *data)
 		dup2(data->pipe_fd[PIPE_WR], STDOUT);
 		close(data->pipe_fd[PIPE_WR]);
 		ft_execvpe(data->av[0][0], data->av[0], data->envp);
-		exit(ERROR);
+		exit_program(data, FAILIURE);
 	}
 	else if (pid == ERROR)
-		return ERROR;
+		return (ERROR);
 	return 0;
 }
 
@@ -173,36 +174,51 @@ int spawn_second_child(t_pipe *data)
 		dup2(data->pipe_fd[PIPE_RD], STDIN);
 		close(data->pipe_fd[PIPE_RD]);
 		ft_execvpe(data->av[1][0], data->av[1], data->envp);
-		exit(ERROR);
+		exit_program(data, FAILIURE);
 	}
 	else if (pid == ERROR)
-		return ERROR;
+		return (ERROR);
 	return 0;
+}
+
+void parse_args(char **av, char **envp, t_pipe *data)
+{
+	data->file[0] = av[1];
+	data->file[1] = av[4];
+	data->av[0] = ft_tokenize(av[2]);
+	data->av[1] = ft_tokenize(av[3]);
+	data->envp = envp;
+	if (data->av[0] == NULL || data->av[1] == NULL)
+		exit_program(data, FAILIURE);
 }
 
 int main(int ac, char **av, char **envp)
 {
 	t_pipe	*data;
+	pid_t	pid1;
+	pid_t	pid2;
+	int		status1;
+	int		status2;
+	int		exit_status;
 
 	if (ac != 5)
-		return (ERROR);
+		return (FAILIURE);
 	data = ft_calloc(1, sizeof(t_pipe));
 	if (data == NULL)
-		return (ERROR);
-	data->file[0] = av[1];
-	data->file[1] = av[4];
-	data->av[0] = ft_tokenize(av[2]);
-	data->av[1] = ft_tokenize(av[3]);
-	if (data->av[0] == NULL || data->av[1] == NULL)
-		exit_program(data, ERROR);
-	data->envp = envp;
+		return (FAILIURE);
+	parse_args(av, envp, data);
 	pipe(data->pipe_fd);
-	spawn_first_child(data);
-	spawn_second_child(data);
+	pid1 = spawn_first_child(data);
+	pid2 = spawn_second_child(data);
 	close_pipe(data->pipe_fd);
-	while (wait(NULL) != -1)
-		;
-	exit_program(data, 0);
+	waitpid(pid1, &status1, 0);
+	waitpid(pid2, &status2, 0);
+	exit_status = SUCCESS;
+	if (pid1 == ERROR)
+		exit_status = FAILIURE;
+	if (pid2 == ERROR)
+		exit_status = FAILIURE;
+	exit_program(data, exit_status);
 }
 
 // Now I have the file1
