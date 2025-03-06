@@ -1,6 +1,7 @@
 NAME		= pipex
 CC			= cc
 # CFLAGS		= -Wall -Wextra -Werror
+CFLAGS		= -ggdb
 AR			= ar rcs
 INCLUDES	= -I./headers/ -I./libft/headers/
 LIBFT_DIR	= libft
@@ -19,7 +20,7 @@ $(NAME): $(LIBFT) $(OBJ)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	mkdir -p $(OBJ_DIR)
-	$(CC) -c $< $(INCLUDES) -o $@
+	$(CC) -c $(CFLAGS) $< $(INCLUDES) -o $@
 
 $(LIBFT):
 	make -C $(LIBFT_DIR)/ all

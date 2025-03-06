@@ -37,8 +37,12 @@ char *ft_getenv(char **envp, char *var)
 
 void *free_split(char **split)
 {
-	while (*split)
-		free(split++);
+	int i;
+
+	i = 0;
+	while (split[i])
+		free(split[i++]);
+	free(split);
 	return (NULL);
 }
 
@@ -63,26 +67,38 @@ char **ft_getpath(char *path)
 	return path_list;
 }
 
+void	execute_file(char **path_list, char *file, char **av, char **envp)
+{
+	char	*file_path;
+	int		i;
+	
+	i = 0;
+	while (path_list[i])
+	{
+		file_path = ft_strjoin(path_list[i++], file); 
+		if (file_path == NULL)
+			return ;
+		execve(file_path, av, envp);
+		free(file_path);
+	}
+	perror(file);
+}
+
 int ft_execvpe(char *file, char **av, char **envp)
 {
-	char	**path_list;
 	char	*path;
-	int		i;
+	char	**path_list;
+
 	if (ft_strchr(file, '/') && execve(file, av, envp) == ERROR)
-	{
-		perror("execve");
-		exit(ERROR);
-	}
+		return ERROR;
 	path = ft_getenv(envp, "PATH=");
 	if (path == NULL)
 		return (ERROR);
 	path_list = ft_getpath(path);
 	if (path_list == NULL)
 		return (ERROR);
-	i = 0;
-	while (execve(ft_strjoin(path_list[i], file), av, envp) == -1)
-		i++;
-	perror("execve");
+	execute_file(path_list, file, av, envp);
+	free_split(path_list);
 	return(ERROR);
 }
 // TODO: generic functions return status, does not exit
@@ -92,9 +108,30 @@ int ft_execvpe(char *file, char **av, char **envp)
 #define PIPE_RD 0
 #define PIPE_WR 1
 
-// O_WRONLY | O_TRUNC | O_CREAT,
-// 				   S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH
-int spawn_first_child(t_pipe data)
+void close_pipe(int fd[2])
+{
+	close(fd[0]);
+	close(fd[1]);
+}
+
+void exit_program(t_pipe *data, int status)
+{
+	close_pipe(data->pipe_fd);
+	if (data->av[0])
+		free_split(data->av[0]);
+	if (data->av[1])
+		free_split(data->av[1]);
+	free(data);
+	exit(status);
+}
+
+void handle_error(char *str, t_pipe *data)
+{
+	perror(str);
+	exit_program(data, ERROR);
+}
+
+int	spawn_first_child(t_pipe *data)
 {
 	pid_t pid;
 	int	  fd;
@@ -102,15 +139,15 @@ int spawn_first_child(t_pipe data)
 	pid = fork();
 	if (pid == 0)
 	{
-		fd = open(data.file[0], O_RDONLY);
-		if (fd == -1)
-			exit(-1);
-		close(data.pipe_fd[PIPE_RD]);
-		if (dup2(fd, STDIN) == ERROR)
-			return ERROR;
-		dup2(data.pipe_fd[PIPE_WR], STDOUT);
-		close(data.pipe_fd[PIPE_WR]);
-		ft_execvpe(data.av[0][0], data.av[0], data.envp);
+		fd = open(data->file[0], O_RDONLY);
+		if (fd == ERROR)
+			handle_error(data->file[0], data);
+		close(data->pipe_fd[PIPE_RD]);
+		dup2(fd, STDIN);
+		close(fd);
+		dup2(data->pipe_fd[PIPE_WR], STDOUT);
+		close(data->pipe_fd[PIPE_WR]);
+		ft_execvpe(data->av[0][0], data->av[0], data->envp);
 		exit(ERROR);
 	}
 	else if (pid == ERROR)
@@ -118,7 +155,7 @@ int spawn_first_child(t_pipe data)
 	return 0;
 }
 
-int spawn_second_child(t_pipe data)
+int spawn_second_child(t_pipe *data)
 {
 	pid_t pid;
 	int fd;
@@ -126,15 +163,16 @@ int spawn_second_child(t_pipe data)
 	pid = fork();
 	if (pid == 0)
 	{
-		fd = open(data.file[1], O_WRONLY | O_TRUNC | O_CREAT,
+		fd = open(data->file[1], O_WRONLY | O_TRUNC | O_CREAT,
 			S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-		if (fd == -1)
-			exit(-1);
-		close(data.pipe_fd[PIPE_WR]);
+		if (fd == ERROR)
+			handle_error(data->file[1], data);
+		close(data->pipe_fd[PIPE_WR]);
 		dup2(fd, STDOUT);
-		dup2(data.pipe_fd[PIPE_RD], STDIN);
-		close(data.pipe_fd[PIPE_RD]);
-		ft_execvpe(data.av[1][0], data.av[1], data.envp);
+		close(fd);
+		dup2(data->pipe_fd[PIPE_RD], STDIN);
+		close(data->pipe_fd[PIPE_RD]);
+		ft_execvpe(data->av[1][0], data->av[1], data->envp);
 		exit(ERROR);
 	}
 	else if (pid == ERROR)
@@ -142,39 +180,29 @@ int spawn_second_child(t_pipe data)
 	return 0;
 }
 
-char **parse_av(char *str)
-{
-	char **av;
-
-	av = ft_tokenize(str);
-	if (av == NULL)
-		return (NULL);
-	return av;
-}
-
-void close_pipe(int fd[2])
-{
-	close(fd[0]);
-	close(fd[1]);
-}
-
 int main(int ac, char **av, char **envp)
 {
-	t_pipe	data;
+	t_pipe	*data;
 
 	if (ac != 5)
 		return (ERROR);
-	data.file[0] = av[1];
-	data.file[1] = av[4];
-	data.av[0] = parse_av(av[2]);
-	data.av[1] = parse_av(av[3]);
-	data.envp = envp;
-	pipe(data.pipe_fd);
+	data = ft_calloc(1, sizeof(t_pipe));
+	if (data == NULL)
+		return (ERROR);
+	data->file[0] = av[1];
+	data->file[1] = av[4];
+	data->av[0] = ft_tokenize(av[2]);
+	data->av[1] = ft_tokenize(av[3]);
+	if (data->av[0] == NULL || data->av[1] == NULL)
+		exit_program(data, ERROR);
+	data->envp = envp;
+	pipe(data->pipe_fd);
 	spawn_first_child(data);
 	spawn_second_child(data);
-	close_pipe(data.pipe_fd);
+	close_pipe(data->pipe_fd);
 	while (wait(NULL) != -1)
 		;
+	exit_program(data, 0);
 }
 
 // Now I have the file1
