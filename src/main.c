@@ -1,48 +1,37 @@
-#include "libft.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/wait.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#define SUCCESS 0
-#define CMD_NOT_FOUND 127
-#define ERROR -1
-#define FAILIURE 1
-#define STDIN 0
-#define STDOUT 1
-#define PIPE_RD 0
-#define PIPE_WR 1
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ihajji <ihajji@student.1337.ma>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/03/07 17:49:09 by ihajji            #+#    #+#             */
+/*   Updated: 2025/03/07 17:59:02 by ihajji           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-typedef	struct s_pipex
+#include "pipex.h"
+
+// char	*ft_getenv(char **envp, char *var)
+// {
+// 	int	var_len;
+//
+// 	if (envp && var)
+// 	{
+// 		var_len = ft_strlen(var);
+// 		while (*envp)
+// 		{
+// 			if (!ft_strncmp(*envp, var, var_len))
+// 				return (*envp + var_len);
+// 			envp++;
+// 		}
+// 	}
+// 	return (NULL);
+// }
+
+void	*free_vector(char **split)
 {
-	char	*file[2];
-	int		pipe_fd[2];
-	char	**av[2];
-	char	**envp;
-}		t_pipe ;
-
-char *ft_getenv(char **envp, char *var)
-{
-	int var_len;
-
-	if (envp && var)
-	{
-		var_len = ft_strlen(var);
-		while (*envp)
-		{
-			if (!ft_strncmp(*envp, var, var_len))
-				return (*envp + var_len);
-			envp++;
-		}
-	}
-	return (NULL);
-}
-
-void *free_vector(char **split)
-{
-	int i;
+	int	i;
 
 	i = 0;
 	while (split[i])
@@ -51,71 +40,69 @@ void *free_vector(char **split)
 	return (NULL);
 }
 
-char **ft_getpath(char *path)
-{
-	char **path_list;
-	char *tmp;
-	int i;
+// char	**ft_getpath(char *path)
+// {
+// 	char	**path_list;
+// 	char	*tmp;
+// 	int		i;
+//
+// 	path_list = ft_split(path, ':');
+// 	if (path_list == NULL)
+// 		return (NULL);
+// 	i = 0;
+// 	while (path_list[i])
+// 	{
+// 		tmp = ft_strjoin(path_list[i], "/");
+// 		if (tmp == NULL)
+// 			return (free_vector(path_list));
+// 		free(path_list[i]);
+// 		path_list[i++] = tmp;
+// 	}
+// 	return (path_list);
+// }
 
-	path_list = ft_split(path, ':');
-	if (path_list == NULL)
-		return (NULL);
-	i = 0;
-	while (path_list[i])
-	{
-		tmp = ft_strjoin(path_list[i], "/");
-		if (tmp == NULL)
-			return (free_vector(path_list));
-		free(path_list[i]);
-		path_list[i++] = tmp;
-	}
-	return path_list;
-}
+// void	execute_file(char **path_list, char *file, char **av, char **envp)
+// {
+// 	char	*file_path;
+// 	int		i;
+//
+// 	i = 0;
+// 	while (path_list[i])
+// 	{
+// 		file_path = ft_strjoin(path_list[i++], file);
+// 		if (file_path == NULL)
+// 			return ;
+// 		execve(file_path, av, envp);
+// 		free(file_path);
+// 	}
+// 	perror(file);
+// }
+//
+// int	ft_execvpe(char *file, char **av, char **envp)
+// {
+// 	char	*path;
+// 	char	**path_list;
+//
+// 	if (ft_strchr(file, '/') && execve(file, av, envp) == ERROR)
+// 		return (ERROR);
+// 	path = ft_getenv(envp, "PATH=");
+// 	if (path == NULL)
+// 		return (ERROR);
+// 	path_list = ft_getpath(path);
+// 	if (path_list == NULL)
+// 		return (ERROR);
+// 	execute_file(path_list, file, av, envp);
+// 	free_vector(path_list);
+// 	return (ERROR);
+// }
 
-void	execute_file(char **path_list, char *file, char **av, char **envp)
-{
-	char	*file_path;
-	int		i;
-
-	i = 0;
-	while (path_list[i])
-	{
-		file_path = ft_strjoin(path_list[i++], file);
-		if (file_path == NULL)
-			return ;
-		execve(file_path, av, envp);
-		free(file_path);
-	}
-	perror(file);
-}
-
-int ft_execvpe(char *file, char **av, char **envp)
-{
-	char	*path;
-	char	**path_list;
-
-	if (ft_strchr(file, '/') && execve(file, av, envp) == ERROR)
-		return ERROR;
-	path = ft_getenv(envp, "PATH=");
-	if (path == NULL)
-		return (ERROR);
-	path_list = ft_getpath(path);
-	if (path_list == NULL)
-		return (ERROR);
-	execute_file(path_list, file, av, envp);
-	free_vector(path_list);
-	return(ERROR);
-}
-// TODO: generic functions return status, does not exit
-
-
-void close_pipe(int fd[2])
+void	close_pipe(int fd[2])
 {
 	close(fd[0]);
 	close(fd[1]);
 }
 
-void exit_program(t_pipe *data, int status)
+void	exit_program(t_pipe *data, int status)
 {
 	close_pipe(data->pipe_fd);
 	if (data->av[0])
@@ -126,7 +113,7 @@ void exit_program(t_pipe *data, int status)
 	exit(status);
 }
 
-void handle_error(char *str, t_pipe *data)
+void	handle_error(char *str, t_pipe *data)
 {
 	perror(str);
 	exit_program(data, FAILIURE);
@@ -134,8 +121,8 @@ void handle_error(char *str, t_pipe *data)
 
 int	spawn_first_child(t_pipe *data)
 {
-	pid_t pid;
-	int	  fd;
+	pid_t	pid;
+	int		fd;
 
 	pid = fork();
 	if (pid == 0)
@@ -156,16 +143,16 @@ int	spawn_first_child(t_pipe *data)
 	return (pid);
 }
 
-int spawn_second_child(t_pipe *data)
+int	spawn_second_child(t_pipe *data)
 {
-	pid_t pid;
-	int fd;
+	pid_t	pid;
+	int		fd;
 
 	pid = fork();
 	if (pid == 0)
 	{
 		fd = open(data->file[1], O_WRONLY | O_TRUNC | O_CREAT,
-			S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+				S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 		if (fd == ERROR)
 			handle_error(data->file[1], data);
 		close(data->pipe_fd[PIPE_WR]);
@@ -178,10 +165,10 @@ int spawn_second_child(t_pipe *data)
 	}
 	else if (pid == ERROR)
 		return (ERROR);
-	return pid;
+	return (pid);
 }
 
-void parse_args(char **av, char **envp, t_pipe *data)
+void	parse_args(char **av, char **envp, t_pipe *data)
 {
 	data->file[0] = av[1];
 	data->file[1] = av[4];
@@ -192,13 +179,9 @@ void parse_args(char **av, char **envp, t_pipe *data)
 		exit_program(data, FAILIURE);
 }
 
-int main(int ac, char **av, char **envp)
+int	main(int ac, char **av, char **envp)
 {
 	t_pipe	*data;
-	pid_t	pid1;
-	pid_t	pid2;
-	int		status1;
-	int		status2;
 	int		exit_status;
 
 	if (ac != 5)
@@ -208,43 +191,16 @@ int main(int ac, char **av, char **envp)
 		return (FAILIURE);
 	parse_args(av, envp, data);
 	pipe(data->pipe_fd);
-	pid1 = spawn_first_child(data);
-	pid2 = spawn_second_child(data);
+	data->pid1 = spawn_first_child(data);
+	data->pid2 = spawn_second_child(data);
 	close_pipe(data->pipe_fd);
-	waitpid(pid1, &status1, 0);
-	waitpid(pid2, &status2, 0);
+	waitpid(data->pid1, &data->status1, 0);
+	waitpid(data->pid2, &data->status2, 0);
 	exit_status = SUCCESS;
-	if (pid1 == ERROR || pid2 == ERROR /* || WEXITSTATUS(status1)  */|| WEXITSTATUS(status2))
+	if (data->pid1 == ERROR || data->pid2 == ERROR
+		|| WEXITSTATUS(data->status2))
 		exit_status = FAILIURE;
-	if (WEXITSTATUS(status2) == CMD_NOT_FOUND)
+	if (WEXITSTATUS(data->status2) == CMD_NOT_FOUND)
 		exit_status = CMD_NOT_FOUND;
 	exit_program(data, exit_status);
 }
-
-// Now I have the file1
-// now that I waited I have the output, now I need to read it somehow
-// I have written in  the pipe, now I need to read from it
-// fork another time,
-// dup the 0 into the read end of the pipe
-// and execute the second command
-// and in that procces, dup the 1 into the file2 to save the output
-//
-//
-//
-// allocate memory and push to the pointer to a list,
-// and ft_free
-//
-//
-//
-//
-// now that i have path list, I need to figure out where is the command located?
-// 	maybe I need to execve it until the return value is not -1;
-// NOTE:	check with access the existence of cmd1, and cmd2
-// 			check the existence of the file1 and file2
-//
-// suppose input is valid
-// NOTE: FIX LATER
-//
-// search for the PATH= variable in environ
-// 	search for the command1 in the path environ
-// 	search for the command2 in the path environ
