@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "pipex.h"
+#include <stdio.h>
 
 // char	*ft_getenv(char **envp, char *var)
 // {
@@ -136,6 +137,7 @@ int	spawn_first_child(t_pipe *data)
 		dup2(data->pipe_fd[PIPE_WR], STDOUT);
 		close(data->pipe_fd[PIPE_WR]);
 		ft_execvpe(data->av[0][0], data->av[0], data->envp);
+		perror(data->av[0][0]);
 		exit_program(data, CMD_NOT_FOUND);
 	}
 	else if (pid == ERROR)
@@ -161,6 +163,7 @@ int	spawn_second_child(t_pipe *data)
 		dup2(data->pipe_fd[PIPE_RD], STDIN);
 		close(data->pipe_fd[PIPE_RD]);
 		ft_execvpe(data->av[1][0], data->av[1], data->envp);
+		perror(data->av[1][0]);
 		exit_program(data, CMD_NOT_FOUND);
 	}
 	else if (pid == ERROR)
