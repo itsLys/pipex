@@ -7,8 +7,13 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #define SUCCESS 0
+#define CMD_NOT_FOUND 127
 #define ERROR -1
 #define FAILIURE 1
+#define STDIN 0
+#define STDOUT 1
+#define PIPE_RD 0
+#define PIPE_WR 1
 
 typedef	struct s_pipex
 {
@@ -34,9 +39,8 @@ char *ft_getenv(char **envp, char *var)
 	}
 	return (NULL);
 }
-// test edge cases
 
-void *free_split(char **split)
+void *free_vector(char **split)
 {
 	int i;
 
@@ -61,7 +65,7 @@ char **ft_getpath(char *path)
 	{
 		tmp = ft_strjoin(path_list[i], "/");
 		if (tmp == NULL)
-			return (free_split(path_list));
+			return (free_vector(path_list));
 		free(path_list[i]);
 		path_list[i++] = tmp;
 	}
@@ -99,15 +103,11 @@ int ft_execvpe(char *file, char **av, char **envp)
 	if (path_list == NULL)
 		return (ERROR);
 	execute_file(path_list, file, av, envp);
-	free_split(path_list);
+	free_vector(path_list);
 	return(ERROR);
 }
 // TODO: generic functions return status, does not exit
 
-#define STDIN 0
-#define STDOUT 1
-#define PIPE_RD 0
-#define PIPE_WR 1
 
 void close_pipe(int fd[2])
 {
@@ -119,9 +119,9 @@ void exit_program(t_pipe *data, int status)
 {
 	close_pipe(data->pipe_fd);
 	if (data->av[0])
-		free_split(data->av[0]);
+		free_vector(data->av[0]);
 	if (data->av[1])
-		free_split(data->av[1]);
+		free_vector(data->av[1]);
 	free(data);
 	exit(status);
 }
@@ -149,11 +149,11 @@ int	spawn_first_child(t_pipe *data)
 		dup2(data->pipe_fd[PIPE_WR], STDOUT);
 		close(data->pipe_fd[PIPE_WR]);
 		ft_execvpe(data->av[0][0], data->av[0], data->envp);
-		exit_program(data, FAILIURE);
+		exit_program(data, CMD_NOT_FOUND);
 	}
 	else if (pid == ERROR)
 		return (ERROR);
-	return 0;
+	return (pid);
 }
 
 int spawn_second_child(t_pipe *data)
@@ -174,11 +174,11 @@ int spawn_second_child(t_pipe *data)
 		dup2(data->pipe_fd[PIPE_RD], STDIN);
 		close(data->pipe_fd[PIPE_RD]);
 		ft_execvpe(data->av[1][0], data->av[1], data->envp);
-		exit_program(data, FAILIURE);
+		exit_program(data, CMD_NOT_FOUND);
 	}
 	else if (pid == ERROR)
 		return (ERROR);
-	return 0;
+	return pid;
 }
 
 void parse_args(char **av, char **envp, t_pipe *data)
@@ -214,10 +214,10 @@ int main(int ac, char **av, char **envp)
 	waitpid(pid1, &status1, 0);
 	waitpid(pid2, &status2, 0);
 	exit_status = SUCCESS;
-	if (pid1 == ERROR)
+	if (pid1 == ERROR || pid2 == ERROR /* || WEXITSTATUS(status1)  */|| WEXITSTATUS(status2))
 		exit_status = FAILIURE;
-	if (pid2 == ERROR)
-		exit_status = FAILIURE;
+	if (WEXITSTATUS(status2) == CMD_NOT_FOUND)
+		exit_status = CMD_NOT_FOUND;
 	exit_program(data, exit_status);
 }
 
