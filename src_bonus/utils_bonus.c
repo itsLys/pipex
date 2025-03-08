@@ -36,6 +36,17 @@ void	close_pipe(int fd[2])
 	close(fd[1]);
 }
 
+void *free_mem(char ***mem)
+{
+	int	i;
+
+	i = 0;
+	while (mem[i])
+		ft_free_vector(mem[i++]);
+	free(mem);
+	return (NULL);
+}
+
 void	parse_args(int ac, char **av, char **envp, t_pipe *data)
 {
 	int	i;
@@ -48,9 +59,13 @@ void	parse_args(int ac, char **av, char **envp, t_pipe *data)
 	{
 		data->av[i] = ft_tokenize(av[i]);
 		if (data->av[i] == NULL)
-			ft_free_vector(data->av[i], i);
+		{
+			free_mem(data->av);
+			exit_program(t_pipe *data, int status)
+		}
 		i++;
 	}
+	// WARN: Gc needed
 	// NOTE: free vector isn't right, free uses size
 	data->av[i] = NULL;
 	data->envp = envp;

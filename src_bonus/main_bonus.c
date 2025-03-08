@@ -57,7 +57,8 @@ int	main(int ac, char **av, char **envp)
 	if (data == NULL)
 		return (FAILIURE);
 	parse_args(ac, av, envp, data);
-	pipe(data->pipe_fd);
+	if (pipe(data->pipe_fd) == ERROR)
+		exit_program(data, FAILIURE);
 	data->pid[FIRST_CHILD] = spawn_first_child(data);
 	spawn_middle_children(data);
 	data->pid[LAST_CHILD] = spawn_last_child(data);
