@@ -38,11 +38,21 @@ void	close_pipe(int fd[2])
 
 void	parse_args(int ac, char **av, char **envp, t_pipe *data)
 {
+	int	i;
+
+	i = 2;
 	data->file[0] = av[1];
-	data->file[1] = av[4];
-	data->av = ft_calloc(ac - 3 + 1, sizeof(char **))
-	data->av[0] = ft_tokenize(av[2]);
-	data->av[1] = ft_tokenize(av[3]);
+	data->file[1] = av[ac - 1];
+	data->av = ft_calloc(ac - 2, sizeof(char **));
+	while (i < ac - 2)
+	{
+		data->av[i] = ft_tokenize(av[i]);
+		if (data->av[i] == NULL)
+			ft_free_vector(data->av[i], i);
+		i++;
+	}
+	// NOTE: free vector isn't right, free uses size
+	data->av[i] = NULL;
 	data->envp = envp;
 	if (data->av[0] == NULL || data->av[1] == NULL)
 		exit_program(data, FAILIURE);
