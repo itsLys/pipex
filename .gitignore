@@ -1,4 +1,5 @@
 a.out
 *.o
 obj
+pipex
 42_pipex_tester
