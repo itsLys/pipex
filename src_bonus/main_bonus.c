@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "pipex_bonus.h"
+#include <stdio.h>
 #include <unistd.h>
 
 // int	spawn_last_child(t_pipe *data)
@@ -57,24 +58,35 @@ int	main(int ac, char **av, char **envp)
 	if (data == NULL)
 		return (FAILIURE);
 	parse_args(ac, av, envp, data);
-	if (pipe(data->pipe_fd) == ERROR)
-		exit_program(data, FAILIURE);
-	data->pid[FIRST_CHILD] = spawn_first_child(data);
-	spawn_middle_children(data);
-	data->pid[LAST_CHILD] = spawn_last_child(data);
-	close_pipe(data->pipe_fd);
-	waitpid(data->pid[FIRST_CHILD], &data->status[FIRST_CHILD], 0);
-	waitpid(data->pid[LAST_CHILD], &data->status[LAST_CHILD], 0);
-	exit_status = SUCCESS;
-	if (data->pid[0] == ERROR || data->pid[1] == ERROR
-		|| WEXITSTATUS(data->status[1]))
-		exit_status = FAILIURE;
-	if (WEXITSTATUS(data->status[1]) == CMD_NOT_FOUND)
-		exit_status = CMD_NOT_FOUND;
-	exit_program(data, exit_status);
+	int i = 0;
+	int j;
+	while (data->av[i])
+	{
+		j = 0;
+		printf("command %d:	", i);
+		while (data->av[i][j])
+			printf("%s ", data->av[i][j++]);
+		printf("\n");
+		i++;
+	}
+	// if (pipe(data->pipe_fd) == ERROR)
+	// 	handle_error(FAILIURE, "pipe", data);
+	// data->pid[FIRST_CHILD] = spawn_first_child(data);
+	// spawn_middle_children(data);
+	// data->pid[LAST_CHILD] = spawn_last_child(data);
+	// close_pipe(data->pipe_fd);
+	// waitpid(data->pid[FIRST_CHILD], &data->status[FIRST_CHILD], 0);
+	// waitpid(data->pid[LAST_CHILD], &data->status[LAST_CHILD], 0);
+	// exit_status = SUCCESS;
+	// if (data->pid[0] == ERROR || data->pid[1] == ERROR
+	// 	|| WEXITSTATUS(data->status[1]))
+	// 	exit_status = FAILIURE;
+	// if (WEXITSTATUS(data->status[1]) == CMD_NOT_FOUND)
+	// 	exit_status = CMD_NOT_FOUND;
+	// exit_program(data, exit_status);
 }
 
 // ac == N + 3
 // ./pipex f1 cmd1 cmd2 ... cmdN f2
-// first command is av[2] 
-// last command is av[ac - 1] 
+// first command is av[2]
+// last command is av[ac - 1]

@@ -1,6 +1,6 @@
 vpath %.c src src_bonus
 NAME		= pipex
-BONUS		= pipex
+BONUS		= pipex_bonus
 CC			= cc
 # CFLAGS		= -Wall -Wextra -Werror
 CFLAGS		= -ggdb
@@ -24,7 +24,6 @@ OBJ_BONUS	= $(addprefix $(OBJ_DIR)/, $(SRC_BONUS:.c=.o))
 all: $(NAME)
 
 bonus:	$(BONUS)
-
 
 $(NAME): $(LIBFT) $(OBJ)
 	$(CC) $(OBJ) $(LIBFT) -o $(NAME)

@@ -15,11 +15,13 @@
 
 void	exit_program(t_pipe *data, int status)
 {
+	int	i;
+
+	i = 0;
 	close_pipe(data->pipe_fd);
-	if (data->av[0])
-		ft_free_vector(data->av[0]);
-	if (data->av[1])
-		ft_free_vector(data->av[1]);
+	while (data->av[i])
+		free(data->av[i++]);
+	free(data->av);
 	free(data);
 	exit(status);
 }
@@ -36,16 +38,6 @@ void	close_pipe(int fd[2])
 	close(fd[1]);
 }
 
-void *free_mem(char ***mem)
-{
-	int	i;
-
-	i = 0;
-	while (mem[i])
-		ft_free_vector(mem[i++]);
-	free(mem);
-	return (NULL);
-}
 
 void	parse_args(int ac, char **av, char **envp, t_pipe *data)
 {
@@ -59,18 +51,10 @@ void	parse_args(int ac, char **av, char **envp, t_pipe *data)
 	{
 		data->av[i] = ft_tokenize(av[i]);
 		if (data->av[i] == NULL)
-		{
-			free_mem(data->av);
-			exit_program(t_pipe *data, int status)
-		}
+			handle_error(FAILIURE, "malloc", data);
 		i++;
 	}
-	// WARN: Gc needed
-	// NOTE: free vector isn't right, free uses size
-	data->av[i] = NULL;
 	data->envp = envp;
-	if (data->av[0] == NULL || data->av[1] == NULL)
-		exit_program(data, FAILIURE);
 }
 
 // ac == N + 3
