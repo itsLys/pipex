@@ -30,8 +30,9 @@ int	main(int ac, char **av, char **envp)
 	waitpid(data->pid[FIRST_CHILD], &data->status[FIRST_CHILD], 0);
 	waitpid(data->pid[LAST_CHILD], &data->status[LAST_CHILD], 0);
 	exit_status = SUCCESS;
-	if (data->pid[0] == ERROR || data->pid[1] == ERROR
-		|| WEXITSTATUS(data->status[1]))
+	if (data->pid[0] == ERROR || data->pid[1] == ERROR)
+		handle_error(FAILIURE, "fork", data);
+	if (WEXITSTATUS(data->status[1]))
 		exit_status = FAILIURE;
 	if (WEXITSTATUS(data->status[1]) == CMD_NOT_FOUND)
 		exit_status = CMD_NOT_FOUND;

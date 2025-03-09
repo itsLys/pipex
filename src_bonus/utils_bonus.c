@@ -12,6 +12,7 @@
 
 #include "libft.h"
 #include "pipex_bonus.h"
+#include <stdio.h>
 
 void	exit_program(t_pipe *data, int status)
 {
@@ -20,7 +21,7 @@ void	exit_program(t_pipe *data, int status)
 	i = 0;
 	close_pipe(data->pipe_fd);
 	while (data->av[i])
-		free(data->av[i++]);
+		ft_free_vector(data->av[i++]);
 	free(data->av);
 	free(data);
 	exit(status);
@@ -43,17 +44,18 @@ void	parse_args(int ac, char **av, char **envp, t_pipe *data)
 {
 	int	i;
 
-	i = 2;
+	i = 0;
 	data->file[0] = av[1];
 	data->file[1] = av[ac - 1];
 	data->av = ft_calloc(ac - 2, sizeof(char **));
-	while (i < ac - 2)
+	while (i < ac - 3)
 	{
-		data->av[i] = ft_tokenize(av[i]);
+		data->av[i] = ft_tokenize(av[i + 2]);
 		if (data->av[i] == NULL)
 			handle_error(FAILIURE, "malloc", data);
 		i++;
 	}
+	data->ac = i;
 	data->envp = envp;
 }
 

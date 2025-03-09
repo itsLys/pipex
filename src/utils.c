@@ -43,5 +43,5 @@ void	parse_args(char **av, char **envp, t_pipe *data)
 	data->av[1] = ft_tokenize(av[3]);
 	data->envp = envp;
 	if (data->av[0] == NULL || data->av[1] == NULL)
-		exit_program(data, FAILIURE);
+		handle_error(FAILIURE, "malloc", data);
 }

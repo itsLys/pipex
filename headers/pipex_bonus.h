@@ -30,16 +30,17 @@
 # define PIPE_RD 0
 # define PIPE_WR 1
 # define FIRST_CHILD 0
-# define LAST_CHILD ac - 1
+# define LAST_CHILD 1
 
 typedef struct s_pipex
 {
 	char	*file[2];
 	int		pipe_fd[2];
+	int		ac;
 	char	***av;
 	char	**envp;
-	pid_t	*pid;
-	int		*status;
+	pid_t	pid[2];
+	int		status[2];
 }			t_pipe;
 
 void	close_pipe(int fd[2]);
@@ -47,6 +48,7 @@ void	exit_program(t_pipe *data, int status);
 void	handle_error(int status, char *str, t_pipe *data);
 void	parse_args(int ac, char **av, char **envp, t_pipe *data);
 int		spawn_first_child(t_pipe *data);
+int		spawn_middle_children(t_pipe *data);
 int		spawn_last_child(t_pipe *data);
 
 #endif // !PIPEX_H
