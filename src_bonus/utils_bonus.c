@@ -39,7 +39,6 @@ void	close_pipe(int fd[2])
 	close(fd[1]);
 }
 
-
 void	parse_args(int ac, char **av, char **envp, t_pipe *data)
 {
 	int	i;
@@ -55,12 +54,12 @@ void	parse_args(int ac, char **av, char **envp, t_pipe *data)
 			handle_error(FAILIURE, "malloc", data);
 		i++;
 	}
-	data->ac = i;
+	data->cmd_count = i;
 	data->envp = envp;
 }
 
 // ac == N + 3
 // N == ac - 3
 // ./pipex f1 cmd1 cmd2 ... cmdN f2
-// first command is av[2] 
-// last command is av[ac - 1] 
+// first command is av[2]
+// last command is av[ac - 1]

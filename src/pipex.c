@@ -12,7 +12,7 @@
 
 #include "pipex.h"
 
-int	spawn_first_child(t_pipe *data)
+pid_t	spawn_first_child(t_pipe *data)
 {
 	pid_t	pid;
 	int		fd;
@@ -36,7 +36,7 @@ int	spawn_first_child(t_pipe *data)
 	return (pid);
 }
 
-int	spawn_last_child(t_pipe *data)
+pid_t	spawn_last_child(t_pipe *data)
 {
 	pid_t	pid;
 	int		fd;

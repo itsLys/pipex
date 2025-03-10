@@ -10,39 +10,92 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "get_next_line.h"
+#include "libft.h"
 #include "pipex_bonus.h"
+#include <fcntl.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
-// int	spawn_last_child(t_pipe *data)
-// {
-// 	pid_t	pid;
-// 	int		fd;
-//
-// 	pid = fork();
-// 	if (pid == 0)
-// 	{
-// 		fd = open(data->file[1], O_WRONLY | O_TRUNC | O_CREAT,
-// 				S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-// 		if (fd == ERROR)
-// 			handle_error(FAILIURE, data->file[1], data);
-// 		close(data->pipe_fd[PIPE_WR]);
-// 		dup2(fd, STDOUT);
-// 		close(fd);
-// 		dup2(data->pipe_fd[PIPE_RD], STDIN);
-// 		close(data->pipe_fd[PIPE_RD]);
-// 		ft_execvpe(data->av[1][0], data->av[1], data->envp);
-// 		handle_error(CMD_NOT_FOUND, data->av[1][0], data);
-// 	}
-// 	else if (pid == ERROR)
-// 		return (ERROR);
-// 	return (pid);
-// }
+void	parse_heredoc(char **av, char **envp, t_heredoc *data)
+{
+	data->delim = ft_strjoin(av[2], "\n");
+	data->av[0] = ft_tokenize(av[3]);
+	data->av[1] = ft_tokenize(av[4]);
+	data->file = av[5];
+	data->envp = envp;
+}
 
-// while still on middle commands, open a pipe
-// 	write on it, 
-// 	read from it and the write the output on another pipe
-//
+pid_t	spawn_first_heredoc(t_heredoc *data)
+{
+	pid_t pid;
+	char *str;
+
+	pipe(data->pipe_fd);
+	ft_printf("> ");
+	str = get_next_line(STDIN);
+	while (str && ft_strcmp(str, data->delim))
+	{
+		write (data->pipe_fd[PIPE_WR], str, ft_strlen(str));
+		free(str);
+		ft_printf("> ");
+		str = get_next_line(STDIN);
+	}
+	free(str);
+	close(data->pipe_fd[PIPE_WR]);
+	dup2(data->pipe_fd[PIPE_RD], STDIN);
+	close(data->pipe_fd[PIPE_RD]);
+	pipe(data->pipe_fd);
+	pid = fork();
+	if (pid == 0)
+	{
+		close(data->pipe_fd[PIPE_RD]);
+		dup2(data->pipe_fd[PIPE_WR], STDOUT);
+		close(data->pipe_fd[PIPE_WR]);
+		ft_execvpe(data->av[0][0], data->av[0], data->envp);
+		// handle_error(CMD_NOT_FOUND, data->av[0][0], data);
+	}
+	return pid;
+}
+
+pid_t	spawn_last_heredoc(t_heredoc *data)
+{
+	pid_t pid;
+	int fd;
+
+	pid = fork();
+	if (pid == 0)
+	{
+		fd = open(data->file, O_WRONLY | O_APPEND | O_CREAT,
+			S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+		printf("%d\n", fd);
+		close(data->pipe_fd[PIPE_WR]);
+		dup2(fd, STDOUT);
+		close(fd);
+		dup2(data->pipe_fd[PIPE_RD], STDIN);
+		close(data->pipe_fd[PIPE_RD]);
+		ft_execvpe(data->av[1][0], data->av[1], data->envp);
+	}
+	return pid;
+}
+
+void	handle_heredoc(int ac, char **av, char **envp)
+{
+	t_heredoc	*data;
+	int			exit_status;
+
+	if (ac != 6)
+		exit(FAILIURE);
+	data = ft_calloc(1, sizeof(t_pipe));
+	if (data == NULL)
+		exit(FAILIURE);
+	parse_heredoc(av, envp, data);
+	data->pid[FIRST_CHILD] = spawn_first_heredoc(data);
+	data->pid[LAST_CHILD] = spawn_last_heredoc(data);
+	exit_status = 321321;
+	exit(exit_status);
+}
 
 int	main(int ac, char **av, char **envp)
 {
@@ -51,13 +104,12 @@ int	main(int ac, char **av, char **envp)
 
 	if (ac < 5)
 		return (FAILIURE);
+	if (ft_strcmp(av[1], "here_doc"))
+		handle_heredoc(ac, av, envp);
 	data = ft_calloc(1, sizeof(t_pipe));
 	if (data == NULL)
 		return (FAILIURE);
 	parse_args(ac, av, envp, data);
-	// exit_program(data, SUCCESS);
-	if (pipe(data->pipe_fd) == ERROR)
-		handle_error(FAILIURE, "pipe", data);
 	data->pid[FIRST_CHILD] = spawn_first_child(data);
 	spawn_middle_children(data);
 	data->pid[LAST_CHILD] = spawn_last_child(data);

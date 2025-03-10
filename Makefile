@@ -1,9 +1,9 @@
 vpath %.c src src_bonus
 NAME		= pipex
-BONUS		= pipex_bonus
+BONUS		= pipex
 CC			= cc
-# CFLAGS		= -Wall -Wextra -Werror
-CFLAGS		= -ggdb
+CFLAGS		= -Wall -Wextra -Werror
+# CFLAGS		= -ggdb
 AR			= ar rcs
 INCLUDES	= -I./headers/ -I./libft/headers/
 LIBFT_DIR	= libft
@@ -15,7 +15,9 @@ SRC			= pipex.c \
 			  utils.c
 SRC_BONUS	= pipex_bonus.c \
 			  main_bonus.c \
-			  utils_bonus.c
+			  utils_bonus.c \
+			  get_next_line.c \
+			  get_next_line_utils.c
 OBJ_DIR		= obj
 OBJ			= $(addprefix $(OBJ_DIR)/, $(SRC:.c=.o))
 OBJ_BONUS	= $(addprefix $(OBJ_DIR)/, $(SRC_BONUS:.c=.o))

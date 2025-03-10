@@ -10,8 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef PIPEX_H
-# define PIPEX_H
+#ifndef PIPEX_BONUS_H
+# define PIPEX_BONUS_H
 
 # include "libft.h"
 # include <fcntl.h>
@@ -21,6 +21,7 @@
 # include <sys/stat.h>
 # include <sys/wait.h>
 # include <unistd.h>
+# include "get_next_line.h"
 # define SUCCESS 0
 # define CMD_NOT_FOUND 127
 # define ERROR -1
@@ -36,19 +37,30 @@ typedef struct s_pipex
 {
 	char	*file[2];
 	int		pipe_fd[2];
-	int		ac;
+	int		cmd_count;
 	char	***av;
 	char	**envp;
 	pid_t	pid[2];
 	int		status[2];
 }			t_pipe;
 
+typedef struct s_heredoc
+{
+	char	*file;
+	int		pipe_fd[2];
+	char	*delim;
+	char	**av[2];
+	char	**envp;
+	pid_t	pid[2];
+	int		status[2];
+}			t_heredoc;
+
 void	close_pipe(int fd[2]);
 void	exit_program(t_pipe *data, int status);
 void	handle_error(int status, char *str, t_pipe *data);
 void	parse_args(int ac, char **av, char **envp, t_pipe *data);
-int		spawn_first_child(t_pipe *data);
-int		spawn_middle_children(t_pipe *data);
-int		spawn_last_child(t_pipe *data);
+pid_t	spawn_first_child(t_pipe *data);
+void	spawn_middle_children(t_pipe *data);
+pid_t	spawn_last_child(t_pipe *data);
 
-#endif // !PIPEX_H
+#endif // !PIPEX_BONUS_H

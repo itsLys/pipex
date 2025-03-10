@@ -11,14 +11,14 @@
 /* ************************************************************************** */
 
 #include "pipex_bonus.h"
-#include "libft.h"
-#include <unistd.h>
 
-int	spawn_first_child(t_pipe *data)
+pid_t	spawn_first_child(t_pipe *data)
 {
 	pid_t	pid;
 	int		fd;
 
+	if (pipe(data->pipe_fd) == ERROR)
+		handle_error(FAILIURE, "pipe", data);
 	pid = fork();
 	if (pid == 0)
 	{
@@ -28,7 +28,6 @@ int	spawn_first_child(t_pipe *data)
 		close(data->pipe_fd[PIPE_RD]);
 		dup2(fd, STDIN);
 		close(fd);
-		// printf("Hello\n");
 		dup2(data->pipe_fd[PIPE_WR], STDOUT);
 		close(data->pipe_fd[PIPE_WR]);
 		ft_execvpe(data->av[0][0], data->av[0], data->envp);
@@ -39,12 +38,12 @@ int	spawn_first_child(t_pipe *data)
 	return (pid);
 }
 
-int spawn_middle_children(t_pipe *data)
+void	spawn_middle_children(t_pipe *data)
 {
 	int	i;
 
-	i = 0;
-	while (i < data->ac)
+	i = 1;
+	while (i < data->cmd_count - 1)
 	{
 		close(data->pipe_fd[PIPE_WR]);
 		dup2(data->pipe_fd[PIPE_RD], STDIN);
@@ -53,6 +52,7 @@ int spawn_middle_children(t_pipe *data)
 		if (fork() == 0)
 		{
 			close(data->pipe_fd[PIPE_RD]);
+			printf("n:	%s %s\n", data->av[i][0], data->av[i][1]);
 			dup2(data->pipe_fd[PIPE_WR], STDOUT);
 			close(data->pipe_fd[PIPE_WR]);
 			ft_execvpe(data->av[i][0], data->av[i], data->envp);
@@ -60,10 +60,9 @@ int spawn_middle_children(t_pipe *data)
 		}
 		i++;
 	}
-	return 0;
 }
 
-int	spawn_last_child(t_pipe *data)
+pid_t	spawn_last_child(t_pipe *data)
 {
 	pid_t	pid;
 	int		fd;
@@ -80,8 +79,9 @@ int	spawn_last_child(t_pipe *data)
 		close(fd);
 		dup2(data->pipe_fd[PIPE_RD], STDIN);
 		close(data->pipe_fd[PIPE_RD]);
-		ft_execvpe(data->av[data->ac -1][0], data->av[data->ac - 1], data->envp);
-		handle_error(CMD_NOT_FOUND, data->av[data->ac - 1][0], data);
+		ft_execvpe(data->av[data->cmd_count - 1][0], data->av[data->cmd_count - 1],
+			data->envp);
+		handle_error(CMD_NOT_FOUND, data->av[data->cmd_count - 1][0], data);
 	}
 	else if (pid == ERROR)
 		return (ERROR);

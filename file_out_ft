@@ -1,6 +1,0 @@
-		if (fd == ERROR)
-	else if (pid == ERROR)
-		return (ERROR);
-		if (fd == ERROR)
-	else if (pid == ERROR)
-		return (ERROR);

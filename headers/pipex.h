@@ -46,7 +46,7 @@ void	close_pipe(int fd[2]);
 void	exit_program(t_pipe *data, int status);
 void	handle_error(int status, char *str, t_pipe *data);
 void	parse_args(char **av, char **envp, t_pipe *data);
-int		spawn_first_child(t_pipe *data);
-int		spawn_last_child(t_pipe *data);
+pid_t	spawn_first_child(t_pipe *data);
+pid_t	spawn_last_child(t_pipe *data);
 
 #endif // !PIPEX_H
