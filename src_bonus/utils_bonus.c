@@ -23,7 +23,9 @@ void	exit_program(t_pipe *data, int status)
 	while (data->av[i])
 		ft_free_vector(data->av[i++]);
 	free(data->av);
+	free(data->delim);
 	free(data);
+
 	exit(status);
 }
 

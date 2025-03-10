@@ -23,9 +23,14 @@ void	parse_heredoc(char **av, char **envp, t_pipe *data)
 	data->delim = ft_strjoin(av[2], "\n");
 	if (data->delim == NULL)
 		handle_error(FAILIURE, "malloc", data);
+	data->av = ft_calloc(3, sizeof(char**));
+	if (data->av == NULL)
+		handle_error(FAILIURE, "malloc", data);
 	data->av[0] = ft_tokenize(av[3]);
 	data->av[1] = ft_tokenize(av[4]);
-	data->file[1] = av[5];
+	if (data->av[0] == NULL|| data->av[1] == NULL)
+		handle_error(FAILIURE, "malloc", data);
+	data->file[FILE_OUT] = av[5];
 	data->envp = envp;
 }
 
@@ -50,14 +55,13 @@ int	read_stdin(t_pipe *data)
 	return (SUCCESS);
 }
 
-pid_t	spawn_first_heredoc(t_heredoc *data)
+pid_t	spawn_first_heredoc(t_pipe *data)
 {
 	pid_t pid;
-	char *str;
 
 	pipe(data->pipe_fd);
 	if (read_stdin(data) == ERROR)
-		handle_error(FAILIURE, "malloc", data)
+		handle_error(FAILIURE, "malloc", data);
 	close(data->pipe_fd[PIPE_WR]);
 	dup2(data->pipe_fd[PIPE_RD], STDIN);
 	close(data->pipe_fd[PIPE_RD]);
@@ -73,7 +77,7 @@ pid_t	spawn_first_heredoc(t_heredoc *data)
 	return pid;
 }
 
-pid_t	spawn_last_heredoc(t_heredoc *data)
+pid_t	spawn_last_heredoc(t_pipe *data)
 {
 	pid_t pid;
 	int fd;
@@ -81,9 +85,9 @@ pid_t	spawn_last_heredoc(t_heredoc *data)
 	pid = fork();
 	if (pid == 0)
 	{
-		fd = open(data->file, O_WRONLY | O_APPEND | O_CREAT,
+		fd = open(data->file[FILE_OUT], O_WRONLY | O_APPEND | O_CREAT,
 			S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-		printf("%d\n", fd);
+		// printf("%d\n", fd);
 		close(data->pipe_fd[PIPE_WR]);
 		dup2(fd, STDOUT);
 		close(fd);
@@ -96,7 +100,7 @@ pid_t	spawn_last_heredoc(t_heredoc *data)
 
 void	handle_heredoc(int ac, char **av, char **envp, t_pipe *data)
 {
-	int			exit_status;
+	int	exit_status;
 
 	if (ac != 6)
 		exit_program(data, FAILIURE);

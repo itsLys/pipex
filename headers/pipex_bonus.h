@@ -32,6 +32,8 @@
 # define PIPE_WR 1
 # define FIRST_CHILD 0
 # define LAST_CHILD 1
+# define FILE_IN 0
+# define FILE_OUT 1
 
 // typedef struct s_heredoc
 // {
