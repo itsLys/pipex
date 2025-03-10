@@ -47,25 +47,3 @@ $$
 		return (ERROR);$$
 	return (pid);$$
 }$$
-Hello$
-Hi$
-How are you $
-hiEOF$
-EOFhi$
-$
-dadsaewq$
-dsa$
-ewq$
-eof$
-EOf$
-Hello$
-Hi$
-How are you $
-hiEOF$
-EOFhi$
-$
-dadsaewq$
-dsa$
-ewq$
-eof$
-EOf$

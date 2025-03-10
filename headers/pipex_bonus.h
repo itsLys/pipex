@@ -33,6 +33,17 @@
 # define FIRST_CHILD 0
 # define LAST_CHILD 1
 
+// typedef struct s_heredoc
+// {
+// 	char	*file;
+// 	int		pipe_fd[2];
+// 	char	*delim;
+// 	char	**av[2];
+// 	char	**envp;
+// 	pid_t	pid[2];
+// 	int		status[2];
+// }			t_heredoc;
+
 typedef struct s_pipex
 {
 	char	*file[2];
@@ -42,18 +53,9 @@ typedef struct s_pipex
 	char	**envp;
 	pid_t	pid[2];
 	int		status[2];
+	char	*delim;
 }			t_pipe;
 
-typedef struct s_heredoc
-{
-	char	*file;
-	int		pipe_fd[2];
-	char	*delim;
-	char	**av[2];
-	char	**envp;
-	pid_t	pid[2];
-	int		status[2];
-}			t_heredoc;
 
 void	close_pipe(int fd[2]);
 void	exit_program(t_pipe *data, int status);

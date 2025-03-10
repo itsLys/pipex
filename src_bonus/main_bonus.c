@@ -18,13 +18,36 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-void	parse_heredoc(char **av, char **envp, t_heredoc *data)
+void	parse_heredoc(char **av, char **envp, t_pipe *data)
 {
 	data->delim = ft_strjoin(av[2], "\n");
+	if (data->delim == NULL)
+		handle_error(FAILIURE, "malloc", data);
 	data->av[0] = ft_tokenize(av[3]);
 	data->av[1] = ft_tokenize(av[4]);
-	data->file = av[5];
+	data->file[1] = av[5];
 	data->envp = envp;
+}
+
+int	read_stdin(t_pipe *data)
+{
+	char	*str;
+
+	ft_printf("> ");
+	str = get_next_line(STDIN);
+	if (str == NULL)
+		return (ERROR);
+	while (str && ft_strcmp(str, data->delim))
+	{
+		write (data->pipe_fd[PIPE_WR], str, ft_strlen(str));
+		free(str);
+		ft_printf("> ");
+		str = get_next_line(STDIN);
+		if (str == NULL)
+			return (ERROR);
+	}
+	free(str);
+	return (SUCCESS);
 }
 
 pid_t	spawn_first_heredoc(t_heredoc *data)
@@ -33,16 +56,8 @@ pid_t	spawn_first_heredoc(t_heredoc *data)
 	char *str;
 
 	pipe(data->pipe_fd);
-	ft_printf("> ");
-	str = get_next_line(STDIN);
-	while (str && ft_strcmp(str, data->delim))
-	{
-		write (data->pipe_fd[PIPE_WR], str, ft_strlen(str));
-		free(str);
-		ft_printf("> ");
-		str = get_next_line(STDIN);
-	}
-	free(str);
+	if (read_stdin(data) == ERROR)
+		handle_error(FAILIURE, "malloc", data)
 	close(data->pipe_fd[PIPE_WR]);
 	dup2(data->pipe_fd[PIPE_RD], STDIN);
 	close(data->pipe_fd[PIPE_RD]);
@@ -54,7 +69,6 @@ pid_t	spawn_first_heredoc(t_heredoc *data)
 		dup2(data->pipe_fd[PIPE_WR], STDOUT);
 		close(data->pipe_fd[PIPE_WR]);
 		ft_execvpe(data->av[0][0], data->av[0], data->envp);
-		// handle_error(CMD_NOT_FOUND, data->av[0][0], data);
 	}
 	return pid;
 }
@@ -80,16 +94,12 @@ pid_t	spawn_last_heredoc(t_heredoc *data)
 	return pid;
 }
 
-void	handle_heredoc(int ac, char **av, char **envp)
+void	handle_heredoc(int ac, char **av, char **envp, t_pipe *data)
 {
-	t_heredoc	*data;
 	int			exit_status;
 
 	if (ac != 6)
-		exit(FAILIURE);
-	data = ft_calloc(1, sizeof(t_pipe));
-	if (data == NULL)
-		exit(FAILIURE);
+		exit_program(data, FAILIURE);
 	parse_heredoc(av, envp, data);
 	data->pid[FIRST_CHILD] = spawn_first_heredoc(data);
 	data->pid[LAST_CHILD] = spawn_last_heredoc(data);
@@ -104,11 +114,11 @@ int	main(int ac, char **av, char **envp)
 
 	if (ac < 5)
 		return (FAILIURE);
-	if (ft_strcmp(av[1], "here_doc"))
-		handle_heredoc(ac, av, envp);
 	data = ft_calloc(1, sizeof(t_pipe));
 	if (data == NULL)
 		return (FAILIURE);
+	if (ft_strcmp(av[1], "here_doc") == 0)
+		handle_heredoc(ac, av, envp, data);
 	parse_args(ac, av, envp, data);
 	data->pid[FIRST_CHILD] = spawn_first_child(data);
 	spawn_middle_children(data);

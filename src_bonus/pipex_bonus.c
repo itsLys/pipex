@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "pipex_bonus.h"
+#include <stdio.h>
 
 pid_t	spawn_first_child(t_pipe *data)
 {
