@@ -6,13 +6,11 @@
 /*   By: ihajji <ihajji@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 06:30:28 by ihajji            #+#    #+#             */
-/*   Updated: 2025/03/08 08:39:43 by ihajji           ###   ########.fr       */
+/*   Updated: 2025/03/10 23:55:24 by ihajji           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
 #include "pipex_bonus.h"
-#include <stdio.h>
 
 void	exit_program(t_pipe *data, int status)
 {
@@ -25,7 +23,6 @@ void	exit_program(t_pipe *data, int status)
 	free(data->av);
 	free(data->delim);
 	free(data);
-
 	exit(status);
 }
 
@@ -41,27 +38,24 @@ void	close_pipe(int fd[2])
 	close(fd[1]);
 }
 
-void	parse_args(int ac, char **av, char **envp, t_pipe *data)
+int	read_stdin(t_pipe *data)
 {
-	int	i;
+	char	*str;
 
-	i = 0;
-	data->file[0] = av[1];
-	data->file[1] = av[ac - 1];
-	data->av = ft_calloc(ac - 2, sizeof(char **));
-	while (i < ac - 3)
+	ft_printf("> ");
+	str = get_next_line(STDIN);
+	if (str == NULL)
+		return (ERROR);
+	while (str && ft_strcmp(str, data->delim))
 	{
-		data->av[i] = ft_tokenize(av[i + 2]);
-		if (data->av[i] == NULL)
-			handle_error(FAILIURE, "malloc", data);
-		i++;
+		write(data->pipe_fd[PIPE_WR], str, ft_strlen(str));
+		free(str);
+		ft_printf("> ");
+		str = get_next_line(STDIN);
+		if (str == NULL)
+			return (ERROR);
 	}
-	data->cmd_count = i;
-	data->envp = envp;
+	free(str);
+	get_next_line(FREE_BUFFER);
+	return (SUCCESS);
 }
-
-// ac == N + 3
-// N == ac - 3
-// ./pipex f1 cmd1 cmd2 ... cmdN f2
-// first command is av[2]
-// last command is av[ac - 1]

@@ -14,6 +14,7 @@
 # define GET_NEXT_LINE_H
 
 # define MAX_FD 1024
+# define FREE_BUFFER 1025
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 1
 # endif // !BUFFER_SIZE

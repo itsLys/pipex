@@ -1,4 +1,8 @@
 vpath %.c src src_bonus
+GREEN  = 			\033[0;32m
+YELLOW = 			\033[0;33m
+RED    = 			\033[0;31m
+RESET  = 			\033[0m
 NAME		= pipex
 BONUS		= pipex
 CC			= cc
@@ -16,6 +20,7 @@ SRC			= pipex.c \
 SRC_BONUS	= pipex_bonus.c \
 			  main_bonus.c \
 			  utils_bonus.c \
+			  parser_bonus.c \
 			  get_next_line.c \
 			  get_next_line_utils.c
 OBJ_DIR		= obj
@@ -24,14 +29,18 @@ OBJ_BONUS	= $(addprefix $(OBJ_DIR)/, $(SRC_BONUS:.c=.o))
 
 
 all: $(NAME)
+	@echo "$(GREEN)$(BOLD)pipex done!$(RESET)"
 
 bonus:	$(BONUS)
+	@echo "$(GREEN)$(BOLD)pipex bonus done!$(RESET)"
 
 $(NAME): $(LIBFT) $(OBJ)
-	$(CC) $(OBJ) $(LIBFT) -o $(NAME)
+	@echo "$(YELLOW)complining $(NAME)...$(RESET)"
+	@$(CC) $(OBJ) $(LIBFT) -o $(NAME)
 
 $(BONUS): $(LIBFT) $(OBJ_BONUS)
-	$(CC) $(OBJ_BONUS) $(LIBFT) -o $(BONUS)
+	@echo "$(YELLOW)complining $(NAME) (bonus)...$(RESET)"
+	@$(CC) $(OBJ_BONUS) $(LIBFT) -o $(BONUS)
 
 $(OBJ_DIR)/%.o: %.c
 	mkdir -p $(OBJ_DIR)

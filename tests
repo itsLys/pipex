@@ -1,0 +1,34 @@
+BASIC CHECKS
+# 1: infiles/basic.txt cat -e cat -e outfiles/outfile                             [OK]    [OK]    [OK]    [OK]
+# 2: infiles/basic.txt ls -la cat -e outfiles/outfile                             [OK]    [OK]    [OK]    [OK]
+# 3: infiles/basic.txt ls -l -a cat -e -n outfiles/outfile                        [OK]    [OK]    [OK]    [OK]
+# 4: infiles/basic.txt ls -l -a -f cat -e -n outfiles/outfile                     [OK]    [OK]    [OK]    [OK]
+# 5: infiles/basic.txt ls -laf cat -e -n outfiles/outfile                         [OK]    [OK]    [OK]    [OK]
+# 6: infiles/basic.txt grep -A5 is cat -e outfiles/nonexistingfile                [OK]    [OK]    [OK]    [OK]
+# 7: infiles/basic.txt cat -e grep nonexistingword outfiles/nonexistingfile       [OK]    [OK]    [OK]    [OK]
+# 8: infiles/empty.txt grep nonexistingword cat -e outfiles/outfile               [OK]    [OK]    [OK]    [OK]
+# 9: infiles/basic.txt sleep 3 ls outfiles/outfile                                [OK]    [OK]    [OK]    [OK]
+#10: infiles/big_text.txt cat head -2 outfiles/outfile                            [OK]    [OK]    [OK]    [OK]
+
+ERROR CHECKING
+#11: nonexistingfile cat -e ls outfiles/outfile                                   [OK]    [OK]    [OK]    [OK]
+#12: nonexistingfile cat sleep 3 outfiles/outfile                                 [OK]    [OK]    [OK]    [OK]
+#13: infiles/infile_without_permissions cat -e cat -e outfiles/outfile            [OK]    [OK]    [OK]    [OK]
+#14: infiles/basic.txt cat -e cat -e outfiles/outfile_without_permissions         [OK]    [OK]    [OK]    [OK]
+#15: infiles/basic.txt sleep 3 cat -e outfiles/outfile_without_permissions        [OK]    [OK]    [OK]    [OK]
+#16: nonexistingfile cat -e cat -e outfiles/outfile_without_permissions           [OK]    [OK]    [OK]    [OK]
+#17: infiles/basic.txt nonexistingcommand cat -e outfiles/outfile                 [OK]    [OK]    [OK]    [OK]
+#18: infiles/basic.txt cat -e nonexistingcommand outfiles/outfile                 [OK]    [OK]    [OK]    [OK]
+#19: infiles/basic.txt cat -e cat -nonexistingflag outfiles/outfile               [OK]    [OK]    [OK]    [OK]
+#20:                                                                                                              [OK]
+#21:                                                                                                            [OK]
+#22: infiles/basic.txt cat -e outfiles/outfile                                                              [OK]
+#23:  cat -e cat -e outfiles/outfile                                                                      [OK]
+#24: infiles/basic.txt  cat -e outfiles/outfile                                                           [OK]
+#25: infiles/basic.txt cat -e  outfiles/outfile                                                           [OK]
+
+BONUS
+#26: infiles/basic.txt cat -e cat -e cat -e outfiles/outfile                    [OK]    [OK]    [OK]    [OK]
+#27: infiles/basic.txt cat -e cat -e cat -e cat -e cat -e cat -e cat -e   [OK]    [OK]    [OK]    [OK]
+#28: here_doc EOF cat -e cat -e outfiles/outfile                                [OK]    [OK]    [OK]    [OK]
+

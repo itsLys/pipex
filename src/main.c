@@ -6,7 +6,7 @@
 /*   By: ihajji <ihajji@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 17:49:09 by ihajji            #+#    #+#             */
-/*   Updated: 2025/03/08 08:12:37 by ihajji           ###   ########.fr       */
+/*   Updated: 2025/03/11 00:02:11 by ihajji           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,11 +30,11 @@ int	main(int ac, char **av, char **envp)
 	waitpid(data->pid[FIRST_CHILD], &data->status[FIRST_CHILD], 0);
 	waitpid(data->pid[LAST_CHILD], &data->status[LAST_CHILD], 0);
 	exit_status = SUCCESS;
-	if (data->pid[0] == ERROR || data->pid[1] == ERROR)
+	if (data->pid[FIRST_CHILD] == ERROR || data->pid[LAST_CHILD] == ERROR)
 		handle_error(FAILIURE, "fork", data);
-	if (WEXITSTATUS(data->status[1]))
+	if (WEXITSTATUS(data->status[LAST_CHILD]))
 		exit_status = FAILIURE;
-	if (WEXITSTATUS(data->status[1]) == CMD_NOT_FOUND)
+	if (WEXITSTATUS(data->status[LAST_CHILD]) == CMD_NOT_FOUND)
 		exit_status = CMD_NOT_FOUND;
 	exit_program(data, exit_status);
 }
