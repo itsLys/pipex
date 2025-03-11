@@ -1,20 +1,13 @@
-man:
-	perror
-	strerror
-	access
-	dup
-	dup2
-	execve
-	fork
-	pipe
-	--unlink
-	wait
-	waitpid
+tests:
 
-also check for execve errors
--- pipe buffering
-use pipex for redirecting on tty
-test examples:
-	< file1 tr '[:lower:]' '[:upper:]' | sort | uniq > file2
-
-test executing a non-executable
+out		exit	leak
+[x] file_in "cat -e" "cat -e" file_out
+[x] file_in "ls -la" "cat -e" file_out
+[x] file_in "ls -l -a" "cat -e" file_out
+[x] file_in "ls -l -a -f" "cat -e -n" file_out
+[x] file_in "ls -laf" "cat -e -n" file_out
+[x] file_in "grep -A5 int" "cat -e -n" nonexistingfile
+[x] file_in "cat -e" "grep nonexistingword" nonexistingfile 
+[x] empty "grep nonexistingword" "cat -e" outfile
+[x] file_in "sleep 3" "ls" outfile
+[x] big_text "cat" "head -2" outfile

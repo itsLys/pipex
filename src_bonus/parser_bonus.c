@@ -33,8 +33,8 @@ void	parse_args(int ac, char **av, char **envp, t_pipe *data)
 	int	i;
 
 	i = 0;
-	data->file[0] = av[1];
-	data->file[1] = av[ac - 1];
+	data->file[FILE_IN] = av[1];
+	data->file[FILE_OUT] = av[ac - 1];
 	data->av = ft_calloc(ac - 2, sizeof(char **));
 	while (i < ac - 3)
 	{

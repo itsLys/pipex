@@ -14,6 +14,8 @@
 
 void	handle_heredoc(int ac, char **av, char **envp, t_pipe *data)
 {
+	int	exit_status;
+
 	if (ac != 6)
 	{
 		free(data);
@@ -22,7 +24,16 @@ void	handle_heredoc(int ac, char **av, char **envp, t_pipe *data)
 	parse_heredoc(av, envp, data);
 	data->pid[FIRST_CHILD] = spawn_first_heredoc(data);
 	data->pid[LAST_CHILD] = spawn_last_heredoc(data);
-	exit_program(data, SUCCESS);
+	close_pipe(data->pipe_fd);
+	waitpid(data->pid[FIRST_CHILD], &data->status[FIRST_CHILD], 0);
+	waitpid(data->pid[LAST_CHILD], &data->status[LAST_CHILD], 0);
+	exit_status = SUCCESS;
+	if (data->pid[FIRST_CHILD] == ERROR || data->pid[LAST_CHILD] == ERROR
+		|| WEXITSTATUS(data->status[LAST_CHILD]))
+		exit_status = FAILIURE;
+	if (WEXITSTATUS(data->status[LAST_CHILD]) == CMD_NOT_FOUND)
+		exit_status = CMD_NOT_FOUND;
+	exit_program(data, exit_status);
 }
 
 int	main(int ac, char **av, char **envp)
@@ -45,10 +56,10 @@ int	main(int ac, char **av, char **envp)
 	waitpid(data->pid[FIRST_CHILD], &data->status[FIRST_CHILD], 0);
 	waitpid(data->pid[LAST_CHILD], &data->status[LAST_CHILD], 0);
 	exit_status = SUCCESS;
-	if (data->pid[0] == ERROR || data->pid[1] == ERROR
-		|| WEXITSTATUS(data->status[1]))
+	if (data->pid[FIRST_CHILD] == ERROR || data->pid[LAST_CHILD] == ERROR
+		|| WEXITSTATUS(data->status[LAST_CHILD]))
 		exit_status = FAILIURE;
-	if (WEXITSTATUS(data->status[1]) == CMD_NOT_FOUND)
+	if (WEXITSTATUS(data->status[LAST_CHILD]) == CMD_NOT_FOUND)
 		exit_status = CMD_NOT_FOUND;
 	exit_program(data, exit_status);
 }

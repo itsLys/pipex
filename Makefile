@@ -1,8 +1,8 @@
 vpath %.c src src_bonus
-GREEN  = 			\033[0;32m
-YELLOW = 			\033[0;33m
-RED    = 			\033[0;31m
-RESET  = 			\033[0m
+GREEN  		= \033[0;32m
+YELLOW 		= \033[0;33m
+RED    		= \033[0;31m
+RESET  		= \033[0m
 NAME		= pipex
 BONUS		= pipex
 CC			= cc
@@ -58,5 +58,7 @@ fclean: clean
 	rm -f $(NAME)
 
 re: fclean all
+
+re_bonus: fclean bonus
 
 .PHONY: all clean fclean re $(LIBFT)

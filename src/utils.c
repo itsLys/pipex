@@ -31,6 +31,6 @@ void	handle_error(int status, char *str, t_pipe *data)
 
 void	close_pipe(int fd[2])
 {
-	close(fd[0]);
-	close(fd[1]);
+	close(fd[PIPE_RD]);
+	close(fd[PIPE_WR]);
 }

@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "pipex_bonus.h"
+#include "libft.h"
 
 pid_t	spawn_first_child(t_pipe *data)
 {
@@ -22,9 +23,9 @@ pid_t	spawn_first_child(t_pipe *data)
 	pid = fork();
 	if (pid == 0)
 	{
-		fd = open(data->file[0], O_RDONLY);
+		fd = open(data->file[FILE_IN], O_RDONLY);
 		if (fd == ERROR)
-			handle_error(FAILIURE, data->file[0], data);
+			handle_error(FAILIURE, data->file[FILE_IN], data);
 		close(data->pipe_fd[PIPE_RD]);
 		dup2(fd, STDIN);
 		close(fd);
@@ -69,10 +70,10 @@ pid_t	spawn_last_child(t_pipe *data)
 	pid = fork();
 	if (pid == 0)
 	{
-		fd = open(data->file[1], O_WRONLY | O_TRUNC | O_CREAT,
+		fd = open(data->file[FILE_OUT], O_WRONLY | O_TRUNC | O_CREAT,
 				S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 		if (fd == ERROR)
-			handle_error(FAILIURE, data->file[1], data);
+			handle_error(FAILIURE, data->file[FILE_OUT], data);
 		close(data->pipe_fd[PIPE_WR]);
 		dup2(fd, STDOUT);
 		close(fd);
@@ -105,7 +106,10 @@ pid_t	spawn_first_heredoc(t_pipe *data)
 		dup2(data->pipe_fd[PIPE_WR], STDOUT);
 		close(data->pipe_fd[PIPE_WR]);
 		ft_execvpe(data->av[0][0], data->av[0], data->envp);
+		handle_error(CMD_NOT_FOUND, data->av[0][0], data);
 	}
+	else if (pid == ERROR)
+		return (ERROR);
 	return (pid);
 }
 
@@ -125,6 +129,9 @@ pid_t	spawn_last_heredoc(t_pipe *data)
 		dup2(data->pipe_fd[PIPE_RD], STDIN);
 		close(data->pipe_fd[PIPE_RD]);
 		ft_execvpe(data->av[1][0], data->av[1], data->envp);
+		handle_error(CMD_NOT_FOUND, data->av[0][0], data);
 	}
+	else if (pid == ERROR)
+		return (ERROR);
 	return (pid);
 }
