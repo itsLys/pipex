@@ -63,3 +63,4 @@ int	main(int ac, char **av, char **envp)
 		exit_status = CMD_NOT_FOUND;
 	exit_program(data, exit_status);
 }
+// WARN: exit status

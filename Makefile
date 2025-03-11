@@ -4,7 +4,7 @@ YELLOW 		= \033[0;33m
 RED    		= \033[0;31m
 RESET  		= \033[0m
 NAME		= pipex
-BONUS		= pipex
+BONUS		= pipex_bonus
 CC			= cc
 CFLAGS		= -Wall -Wextra -Werror
 # CFLAGS		= -ggdb
@@ -16,7 +16,8 @@ SRC_DIR		= src
 BONUS_DIR	= src_bonus
 SRC			= pipex.c \
 			  main.c \
-			  utils.c
+			  utils.c \
+			  parser.c
 SRC_BONUS	= pipex_bonus.c \
 			  main_bonus.c \
 			  utils_bonus.c \
@@ -29,10 +30,10 @@ OBJ_BONUS	= $(addprefix $(OBJ_DIR)/, $(SRC_BONUS:.c=.o))
 
 
 all: $(NAME)
-	@echo "$(GREEN)$(BOLD)pipex done!$(RESET)"
+	@echo "$(GREEN)$(BOLD)$(NAME) done!$(RESET)"
 
 bonus:	$(BONUS)
-	@echo "$(GREEN)$(BOLD)pipex bonus done!$(RESET)"
+	@echo "$(GREEN)$(BOLD)$(BONUS) done!$(RESET)"
 
 $(NAME): $(LIBFT) $(OBJ)
 	@echo "$(YELLOW)complining $(NAME)...$(RESET)"

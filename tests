@@ -1,34 +1,31 @@
-BASIC CHECKS
-# 1: infiles/basic.txt cat -e cat -e outfiles/outfile                             [OK]    [OK]    [OK]    [OK]
-# 2: infiles/basic.txt ls -la cat -e outfiles/outfile                             [OK]    [OK]    [OK]    [OK]
-# 3: infiles/basic.txt ls -l -a cat -e -n outfiles/outfile                        [OK]    [OK]    [OK]    [OK]
-# 4: infiles/basic.txt ls -l -a -f cat -e -n outfiles/outfile                     [OK]    [OK]    [OK]    [OK]
-# 5: infiles/basic.txt ls -laf cat -e -n outfiles/outfile                         [OK]    [OK]    [OK]    [OK]
-# 6: infiles/basic.txt grep -A5 is cat -e outfiles/nonexistingfile                [OK]    [OK]    [OK]    [OK]
-# 7: infiles/basic.txt cat -e grep nonexistingword outfiles/nonexistingfile       [OK]    [OK]    [OK]    [OK]
-# 8: infiles/empty.txt grep nonexistingword cat -e outfiles/outfile               [OK]    [OK]    [OK]    [OK]
-# 9: infiles/basic.txt sleep 3 ls outfiles/outfile                                [OK]    [OK]    [OK]    [OK]
-#10: infiles/big_text.txt cat head -2 outfiles/outfile                            [OK]    [OK]    [OK]    [OK]
-
-ERROR CHECKING
-#11: nonexistingfile cat -e ls outfiles/outfile                                   [OK]    [OK]    [OK]    [OK]
-#12: nonexistingfile cat sleep 3 outfiles/outfile                                 [OK]    [OK]    [OK]    [OK]
-#13: infiles/infile_without_permissions cat -e cat -e outfiles/outfile            [OK]    [OK]    [OK]    [OK]
-#14: infiles/basic.txt cat -e cat -e outfiles/outfile_without_permissions         [OK]    [OK]    [OK]    [OK]
-#15: infiles/basic.txt sleep 3 cat -e outfiles/outfile_without_permissions        [OK]    [OK]    [OK]    [OK]
-#16: nonexistingfile cat -e cat -e outfiles/outfile_without_permissions           [OK]    [OK]    [OK]    [OK]
-#17: infiles/basic.txt nonexistingcommand cat -e outfiles/outfile                 [OK]    [OK]    [OK]    [OK]
-#18: infiles/basic.txt cat -e nonexistingcommand outfiles/outfile                 [OK]    [OK]    [OK]    [OK]
-#19: infiles/basic.txt cat -e cat -nonexistingflag outfiles/outfile               [OK]    [OK]    [OK]    [OK]
-#20:                                                                                                              [OK]
-#21:                                                                                                            [OK]
-#22: infiles/basic.txt cat -e outfiles/outfile                                                              [OK]
-#23:  cat -e cat -e outfiles/outfile                                                                      [OK]
-#24: infiles/basic.txt  cat -e outfiles/outfile                                                           [OK]
-#25: infiles/basic.txt cat -e  outfiles/outfile                                                           [OK]
-
-BONUS
-#26: infiles/basic.txt cat -e cat -e cat -e outfiles/outfile                    [OK]    [OK]    [OK]    [OK]
-#27: infiles/basic.txt cat -e cat -e cat -e cat -e cat -e cat -e cat -e   [OK]    [OK]    [OK]    [OK]
-#28: here_doc EOF cat -e cat -e outfiles/outfile                                [OK]    [OK]    [OK]    [OK]
-
+exit	out		leaks
+[x]		[x]		[x] 	Test 1: cat -e cat -e with a valid input file
+[ ] 	[ ]		[ ] 	Test 2: ls -la cat -e
+[ ] 	[ ]		[ ] 	Test 3: ls -l -a cat -e -n
+[ ] 	[ ]		[ ] 	Test 4: ls -l -a -f cat -e -n
+[ ] 	[ ]		[ ] 	Test 5: ls -laf cat -e -n
+[ ] 	[ ]		[ ] 	Test 6: grep -A5 is cat -e with an output file that doesn't exist
+[ ] 	[ ]		[ ] 	Test 7: cat -e grep nonexistingword with a non-matching search
+[ ] 	[ ]		[ ] 	Test 8: grep nonexistingword cat -e with an empty input file
+[ ] 	[ ]		[ ] 	Test 9: sleep 3 ls (tests delay handling)
+[ ] 	[ ]		[ ] 	Test 10: cat head -2 with a large text file
+[ ] 	[ ]		[ ] 	Test 11: Nonexistent input file → cat -e ls
+[ ] 	[ ]		[ ] 	Test 12: Nonexistent input file → cat sleep 3
+[ ] 	[ ]		[ ] 	Test 13: Input file without read permissions → cat -e cat -e
+[ ] 	[ ]		[ ] 	Test 14: Output file without write permissions → cat -e cat -e
+[ ] 	[ ]		[ ] 	Test 15: sleep 3 cat -e with an output file without write permissions
+[ ] 	[ ]		[ ] 	Test 16: Nonexistent input file & output file without write permissions → cat -e cat -e
+[ ] 	[ ]		[ ] 	Test 17: Invalid command → nonexistingcommand cat -e
+[ ] 	[ ]		[ ] 	Test 18: Invalid command in the middle of a pipe → cat -e nonexistingcommand
+[ ] 	[ ]		[ ] 	Test 19: Invalid flag → cat -e cat -nonexistingflag
+[ ] 	[ ]		[ ] 	Test 20-25: Various whitespace and argument edge cases
+[ ] 	[ ]		[ ] 	Test 26: Long chain → cat -e cat -e cat -e
+[ ] 	[ ]		[ ] 	Test 27: Very long chain → cat -e cat -e cat -e cat -e cat -e cat -e cat -e
+[ ] 	[ ]		[ ] 	Test 28: Here document (here_doc EOF cat -e cat -e)
+[ ] 	[ ]		[ ] 	Test 29: Process a very large file with cat -e
+[ ] 	[ ]		[ ] 	Test 30: Pipe more than 10 commands
+[ ] 	[ ]		[ ] 	Test 31: Run parallel pipes with different input/output files
+[ ] 	[ ]		[ ] 	Test 32: Pipe commands that generate high output (yes | head -n 100000)
+[ ] 	[ ]		[ ] 	Test 33: Run cat in an infinite loop (cat /dev/urandom | head -c 10000)
+[ ] 	[ ]		[ ] 	Test 34: Test multiple concurrent executions of the program
+[ ] 	[ ]		[ ] 	Test 35: Run sleep 100 in a pipeline to check if the program waits correctly
