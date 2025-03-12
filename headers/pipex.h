@@ -30,7 +30,7 @@ typedef struct s_pipex
 	char	**av[2];
 	char	**envp;
 	pid_t	pid[2];
-	int		status[2];
+	int		status;
 }			t_pipe;
 
 void	close_pipe(int fd[2]);

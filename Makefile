@@ -7,7 +7,6 @@ NAME		= pipex
 BONUS		= pipex_bonus
 CC			= cc
 CFLAGS		= -Wall -Wextra -Werror
-# CFLAGS		= -ggdb
 AR			= ar rcs
 INCLUDES	= -I./headers/ -I./libft/headers/
 LIBFT_DIR	= libft
@@ -44,22 +43,22 @@ $(BONUS): $(LIBFT) $(OBJ_BONUS)
 	@$(CC) $(OBJ_BONUS) $(LIBFT) -o $(BONUS)
 
 $(OBJ_DIR)/%.o: %.c
-	mkdir -p $(OBJ_DIR)
-	$(CC) -c $(CFLAGS) $< $(INCLUDES) -o $@
+	@mkdir -p $(OBJ_DIR)
+	@$(CC) -c $(CFLAGS) $< $(INCLUDES) -o $@
 
 $(LIBFT):
-	make -C $(LIBFT_DIR)/ all
+	@make -C $(LIBFT_DIR)/ all
 
 clean:
-	make -C $(LIBFT_DIR)/ clean
-	rm -rf $(OBJ_DIR)
+	@make -C $(LIBFT_DIR)/ clean
+	@rm -rf $(OBJ_DIR)
 
 fclean: clean
-	make -C $(LIBFT_DIR)/ fclean
-	rm -f $(NAME)
+	@make -C $(LIBFT_DIR)/ fclean
+	@rm -f $(NAME) $(BONUS)
 
 re: fclean all
 
 re_bonus: fclean bonus
 
-.PHONY: all clean fclean re $(LIBFT)
+.PHONY: clean

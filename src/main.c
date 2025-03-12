@@ -15,7 +15,6 @@
 int	main(int ac, char **av, char **envp)
 {
 	t_pipe	*data;
-	int		exit_status;
 
 	if (ac != 5)
 		return (FAILIURE);
@@ -27,14 +26,9 @@ int	main(int ac, char **av, char **envp)
 	data->pid[FIRST_CHILD] = spawn_first_child(data);
 	data->pid[LAST_CHILD] = spawn_last_child(data);
 	close_pipe(data->pipe_fd);
-	waitpid(data->pid[FIRST_CHILD], &data->status[FIRST_CHILD], 0);
-	waitpid(data->pid[LAST_CHILD], &data->status[LAST_CHILD], 0);
-	exit_status = SUCCESS;
+	waitpid(data->pid[LAST_CHILD], &data->status, 0);
+	wait(NULL);
 	if (data->pid[FIRST_CHILD] == ERROR || data->pid[LAST_CHILD] == ERROR)
 		handle_error(FAILIURE, "fork", data);
-	if (WEXITSTATUS(data->status[LAST_CHILD]))
-		exit_status = FAILIURE;
-	if (WEXITSTATUS(data->status[LAST_CHILD]) == CMD_NOT_FOUND)
-		exit_status = CMD_NOT_FOUND;
-	exit_program(data, exit_status);
+	exit_program(data, WEXITSTATUS(data->status));
 }

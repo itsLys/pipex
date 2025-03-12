@@ -33,7 +33,7 @@ typedef struct s_pipex
 	char	***av;
 	char	**envp;
 	pid_t	pid[2];
-	int		status[2];
+	int		status;
 	char	*delim;
 }			t_pipe;
 
