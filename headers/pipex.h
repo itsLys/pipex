@@ -14,6 +14,7 @@
 # define PIPEX_H
 
 # include "libft.h"
+# include <fcntl.h>
 # include <sys/stat.h>
 # include <sys/wait.h>
 # define PIPE_RD 0
@@ -29,7 +30,6 @@ typedef struct s_pipex
 	int		pipe_fd[2];
 	char	**av[2];
 	char	**envp;
-	pid_t	pid[2];
 	int		status;
 }			t_pipe;
 
@@ -37,7 +37,7 @@ void	close_pipe(int fd[2]);
 void	exit_program(t_pipe *data, int status);
 void	handle_error(int status, char *str, t_pipe *data);
 void	parse_args(char **av, char **envp, t_pipe *data);
-pid_t	spawn_first_child(t_pipe *data);
+void	spawn_first_child(t_pipe *data);
 pid_t	spawn_last_child(t_pipe *data);
 
 #endif // !PIPEX_H

@@ -15,6 +15,7 @@
 
 # include "libft.h"
 # include "get_next_line.h"
+# include <fcntl.h>
 # include <sys/stat.h>
 # include <sys/wait.h>
 # include <unistd.h>
@@ -32,7 +33,6 @@ typedef struct s_pipex
 	int		cmd_count;
 	char	***av;
 	char	**envp;
-	pid_t	pid[2];
 	int		status;
 	char	*delim;
 }			t_pipe;
@@ -43,10 +43,10 @@ void	handle_error(int status, char *str, t_pipe *data);
 void	parse_args(int ac, char **av, char **envp, t_pipe *data);
 void	parse_heredoc(char **av, char **envp, t_pipe *data);
 int		read_stdin(t_pipe *data);
-pid_t	spawn_first_child(t_pipe *data);
+void	spawn_first_child(t_pipe *data);
 void	spawn_middle_children(t_pipe *data);
 pid_t	spawn_last_child(t_pipe *data);
-pid_t	spawn_first_heredoc(t_pipe *data);
+void	spawn_first_heredoc(t_pipe *data);
 pid_t	spawn_last_heredoc(t_pipe *data);
 
 #endif // !PIPEX_BONUS_H

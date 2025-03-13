@@ -12,7 +12,7 @@
 
 #include "pipex.h"
 
-pid_t	spawn_first_child(t_pipe *data)
+void	spawn_first_child(t_pipe *data)
 {
 	pid_t	pid;
 	int		fd;
@@ -32,8 +32,7 @@ pid_t	spawn_first_child(t_pipe *data)
 		handle_error(CMD_NOT_FOUND, data->av[0][0], data);
 	}
 	else if (pid == ERROR)
-		return (ERROR);
-	return (pid);
+		handle_error(FAILIURE, "fork", data);
 }
 
 pid_t	spawn_last_child(t_pipe *data)
@@ -57,6 +56,6 @@ pid_t	spawn_last_child(t_pipe *data)
 		handle_error(CMD_NOT_FOUND, data->av[1][0], data);
 	}
 	else if (pid == ERROR)
-		return (ERROR);
+		handle_error(FAILIURE, "fork", data);
 	return (pid);
 }

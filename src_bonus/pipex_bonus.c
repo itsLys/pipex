@@ -12,7 +12,7 @@
 
 #include "pipex_bonus.h"
 
-pid_t	spawn_first_child(t_pipe *data)
+void	spawn_first_child(t_pipe *data)
 {
 	pid_t	pid;
 	int		fd;
@@ -34,13 +34,13 @@ pid_t	spawn_first_child(t_pipe *data)
 		handle_error(CMD_NOT_FOUND, data->av[0][0], data);
 	}
 	else if (pid == ERROR)
-		return (ERROR);
-	return (pid);
+		handle_error(FAILIURE, "fork", data);
 }
 
 void	spawn_middle_children(t_pipe *data)
 {
-	int	i;
+	int		i;
+	pid_t	pid;
 
 	i = 1;
 	while (i < data->cmd_count - 1)
@@ -49,7 +49,8 @@ void	spawn_middle_children(t_pipe *data)
 		dup2(data->pipe_fd[PIPE_RD], STDIN);
 		close(data->pipe_fd[PIPE_RD]);
 		pipe(data->pipe_fd);
-		if (fork() == 0)
+		pid = fork();
+		if (pid == 0)
 		{
 			close(data->pipe_fd[PIPE_RD]);
 			dup2(data->pipe_fd[PIPE_WR], STDOUT);
@@ -57,6 +58,8 @@ void	spawn_middle_children(t_pipe *data)
 			ft_execvpe(data->av[i][0], data->av[i], data->envp);
 			handle_error(CMD_NOT_FOUND, data->av[i][0], data);
 		}
+		else if (pid == ERROR)
+			handle_error(FAILIURE, "fork", data);
 		i++;
 	}
 }
@@ -79,15 +82,16 @@ pid_t	spawn_last_child(t_pipe *data)
 		dup2(data->pipe_fd[PIPE_RD], STDIN);
 		close(data->pipe_fd[PIPE_RD]);
 		ft_execvpe(data->av[data->cmd_count - 1][0],
-			data->av[data->cmd_count - 1], data->envp);
+			data->av[data->cmd_count - 1],
+			data->envp);
 		handle_error(CMD_NOT_FOUND, data->av[data->cmd_count - 1][0], data);
 	}
 	else if (pid == ERROR)
-		return (ERROR);
+		handle_error(FAILIURE, "fork", data);
 	return (pid);
 }
 
-pid_t	spawn_first_heredoc(t_pipe *data)
+void	spawn_first_heredoc(t_pipe *data)
 {
 	pid_t	pid;
 
@@ -108,8 +112,7 @@ pid_t	spawn_first_heredoc(t_pipe *data)
 		handle_error(CMD_NOT_FOUND, data->av[0][0], data);
 	}
 	else if (pid == ERROR)
-		return (ERROR);
-	return (pid);
+		handle_error(FAILIURE, "fork", data);
 }
 
 pid_t	spawn_last_heredoc(t_pipe *data)
@@ -131,6 +134,6 @@ pid_t	spawn_last_heredoc(t_pipe *data)
 		handle_error(CMD_NOT_FOUND, data->av[0][0], data);
 	}
 	else if (pid == ERROR)
-		return (ERROR);
+		handle_error(FAILIURE, "fork", data);
 	return (pid);
 }
